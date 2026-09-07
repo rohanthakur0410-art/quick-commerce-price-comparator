@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Your cart — QuickCart{% endblock %}
+{% block content %}
+
+<div class="pd-header">
+    <h1>Your cart</h1>
+    {% if locality %}<div class="p-meta">Comparing for {{ locality }}</div>{% endif %}
+</div>
+
+{% if not items %}
+    <div class="empty-state">Your cart is empty. <a href="{% url 'home' %}" class="underline-link">Browse products</a> to add some.</div>
+{% elif not locality %}
+    <div class="empty-state">Select a location to compare basket prices.</div>
+{% else %}
+
+<div class="section">
+    <table class="offers-table">
+        <thead><tr><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">Best price</th><th scope="col">Best on</th><th scope="col"><span class="sr-only">Remove</span></th></tr></thead>
+        <tbody>
+        {% for product, qty in items %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td data-label="Qty">
+                    <form method="post" action="{% url 'cart-update' product.id %}" class="qty-form">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="{{ qty }}" min="1" max="50" onchange="this.form.submit()">
+                    </form>
+                </td>
+                <td data-label="Best price">
+                    {% for item in result.items %}
+                        {% if item.product.id == product.id %}
+                            {% if item.best_price %}₹{{ item.best_price }} <span class="muted-small">each</span>{% else %}<span class="badge-mute">Unavailable</span>{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td data-label="Best on">
+                    {% for item in result.items %}
+                        {% if item.product.id == product.id %}{{ item.best_platform|default:"—" }}{% endif %}
+                    {% endfor %}
+                </td>
+                <td data-label="">
+                    <form method="post" action="{% url 'cart-remove' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if result %}
+<div class="section">
+    <div class="section-head"><h2>Buy everything from one platform</h2></div>
+    <table class="offers-table">
+        <thead><tr><th scope="col">Platform</th><th scope="col">Subtotal</th><th scope="col">Delivery fee</th><th scope="col">Total</th></tr></thead>
+        <tbody>
+        {% for t in result.single_platform_totals %}
+            {% if t.can_fulfill_all %}
+            <tr class="{% if result.best_single_platform and t.platform_name == result.best_single_platform.platform_name %}best-row{% endif %}">
+                <td>{{ t.platform_name }}{% if result.best_single_platform and t.platform_name == result.best_single_platform.platform_name %}<span class="best-tag">BEST VALUE</span>{% endif %}</td>
+                <td data-label="Subtotal">₹{{ t.subtotal }}</td>
+                <td data-label="Delivery fee">₹{{ t.delivery_fee }} <span class="muted-small">(simulated)</span></td>
+                <td class="fw-700" data-label="Total">₹{{ t.total }}</td>
+            </tr>
+            {% else %}
+            <tr class="unavailable-row">
+                <td>{{ t.platform_name }}</td>
+                <td colspan="3">Can't fulfill the full basket in {{ locality.name }}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if result.recommend_split %}
+<div class="section">
+    <div class="section-head"><h2>🏆 Cheaper combination available</h2></div>
+    <div class="split-banner">
+        <div class="split-total">₹{{ result.optimized_total }} <span class="muted-small">total across {{ result.optimized_split|length }} platforms</span></div>
+        <div class="savings-pill">Save ₹{{ result.savings_vs_single }} vs buying everything from {{ result.best_single_platform.platform_name }}</div>
+    </div>
+    <table class="offers-table">
+        <thead><tr><th scope="col">Platform</th><th scope="col">Items</th><th scope="col">Subtotal</th><th scope="col">Delivery fee</th><th scope="col">Total</th></tr></thead>
+        <tbody>
+        {% for group in result.optimized_split %}
+            <tr>
+                <td>{{ group.platform_name }}</td>
+                <td data-label="Items">{% for line in group.items %}{{ line.0 }} ×{{ line.1 }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                <td data-label="Subtotal">₹{{ group.subtotal }}</td>
+                <td data-label="Delivery fee">₹{{ group.delivery_fee }} <span class="muted-small">(simulated)</span></td>
+                <td class="fw-700" data-label="Total">₹{{ group.total }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if result.explanation %}
+    <div class="why-box">
+        <div class="why-title">Why this split?</div>
+        <ul>
+            {% for line in result.explanation %}<li>{{ line }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% elif result.best_single_platform %}
+<div class="section">
+    <div class="split-banner">
+        <div class="split-total">Best value: buy everything from {{ result.best_single_platform.platform_name }} — ₹{{ result.best_single_platform.total }}</div>
+        <div class="muted-small">Splitting across platforms wouldn't save enough here once delivery fees are counted.</div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — QuickCart{% endblock %}
+{% block content %}
+
+<a href="{% url 'home' %}" class="back-link">&larr; Back to search</a>
+
+<div class="pd-layout">
+    <div class="pd-image">
+        {% if product.image_path %}
+            <img src="/static/{{ product.image_path }}" alt="{{ product.name }}" width="220" height="220">
+        {% else %}
+            <div class="p-image-fallback large">{{ product.brand|slice:":2"|upper }}</div>
+        {% endif %}
+    </div>
+    <div class="pd-header">
+        <h1>{{ product.name }}</h1>
+        <div class="p-meta">
+            {{ product.brand }} · {{ product.subcategory.category.name }} · {{ product.subcategory.name }} · {{ product.quantity|floatformat:"-3" }}{{ product.unit }}
+            {% if locality %} · Delivering to {{ locality }}{% endif %}
+        </div>
+    </div>
+</div>
+
+{% if not locality %}
+    <div class="empty-state">Select a location to see prices for this product.</div>
+{% elif comparison.lowest_price %}
+<div class="best-price-hero">
+    <div>
+        <div class="label">Best price today</div>
+        <div class="amount">₹{{ comparison.lowest_price }}</div>
+        <div class="platform">on {{ comparison.best_platform }}</div>
+        {% with best_row=comparison.rows.0 %}
+            {% if best_row.promotion_text %}<span class="promo-badge">{{ best_row.promotion_text }}</span>{% endif %}
+        {% endwith %}
+    </div>
+    <div class="hero-actions">
+        {% if comparison.savings_vs_next_best %}
+        <span class="savings-pill">₹{{ comparison.savings_vs_next_best }} cheaper than the next-best option</span>
+        {% endif %}
+        <div class="hero-buttons">
+            <form method="post" action="{% url 'cart-add' product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="cta-button">Add to cart</button>
+            </form>
+            {% with best_row=comparison.rows.0 %}
+            {% if best_row.buy_url %}
+            <a href="{{ best_row.buy_url }}" target="_blank" rel="noopener noreferrer" class="cta-button secondary">
+                Buy on {{ comparison.best_platform }}
+            </a>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="demo-cta-note">
+            Prices shown are simulated.
+            {% with best_row=comparison.rows.0 %}
+                {% if best_row.buy_url_is_search %}
+                    "Buy" opens {{ comparison.best_platform }}'s real site with this product searched for you.
+                {% else %}
+                    "Buy" opens {{ comparison.best_platform }}'s real site to search for this product yourself.
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="best-price-hero">
+    <div>
+        <div class="label">Availability</div>
+        <div class="amount" style="font-size:20px;">Currently unavailable in {{ locality.name }}</div>
+    </div>
+</div>
+{% endif %}
+
+{% if locality and insights.sample_size %}
+<div class="stat-strip">
+    <div class="stat-box">
+        <div class="stat-label">Current price</div>
+        <div class="stat-value">{% if insights.current_price %}₹{{ insights.current_price }}{% else %}—{% endif %}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Price change</div>
+        <div class="stat-value">
+            {% if insights.change_amount is not None %}
+                {% if insights.change_amount < 0 %}
+                    <span class="change-indicator down">&darr; ₹{{ insights.change_amount|floatformat:2|slice:"1:" }} today</span>
+                {% elif insights.change_amount > 0 %}
+                    <span class="change-indicator up">&uarr; ₹{{ insights.change_amount|floatformat:2 }} today</span>
+                {% else %}
+                    <span class="change-indicator flat">No change</span>
+                {% endif %}
+            {% else %}—{% endif %}
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Lowest recorded</div>
+        <div class="stat-value">{% if insights.lowest_recorded %}₹{{ insights.lowest_recorded }}{% else %}—{% endif %}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Recent average</div>
+        <div class="stat-value">{% if insights.average_recent %}₹{{ insights.average_recent|floatformat:2 }}{% else %}—{% endif %}</div>
+    </div>
+</div>
+{% endif %}
+
+{% if locality %}
+<div class="section">
+    <div class="section-head">
+        <h2>Platform comparison</h2>
+        <span class="hint">{{ comparison.available_count }} of {{ comparison.total_count }} platform{{ comparison.total_count|pluralize }} available</span>
+    </div>
+    <table class="offers-table">
+        <caption class="sr-only">Price comparison for {{ product.name }} across quick-commerce platforms</caption>
+        <thead>
+            <tr><th scope="col">Platform</th><th scope="col">Price</th><th scope="col">Availability</th><th scope="col">Delivery</th><th scope="col">Promotion</th><th scope="col">Last checked</th><th scope="col"><span class="sr-only">Buy</span></th></tr>
+        </thead>
+        <tbody>
+            {% for row in comparison.rows %}
+            <tr class="{% if row.platform_name == comparison.best_platform %}best-row{% elif not row.serviceable %}unserviceable-row{% elif not row.is_available %}unavailable-row{% endif %}">
+                <td>{{ row.platform_name }}{% if row.platform_name == comparison.best_platform %}<span class="best-tag">BEST DEAL</span>{% endif %}</td>
+                <td data-label="Price">{% if row.price %}₹{{ row.price }}{% else %}—{% endif %}</td>
+                <td data-label="Availability">
+                    {% if not row.serviceable %}Not available in this area
+                    {% elif row.is_available %}In stock
+                    {% else %}Out of stock{% endif %}
+                </td>
+                <td data-label="Delivery">{% if row.delivery_minutes %}~{{ row.delivery_minutes }} min{% else %}—{% endif %}</td>
+                <td data-label="Promotion">{% if row.promotion_text %}<span class="promo-badge small">{{ row.promotion_text }}</span>{% else %}—{% endif %}</td>
+                <td class="muted-small" data-label="Last checked">{% if row.last_checked_at %}{{ row.last_checked_at|slice:"11:16" }}{% else %}—{% endif %}</td>
+                <td data-label="">
+                    {% if row.is_available and row.buy_url %}
+                        <a href="{{ row.buy_url }}" target="_blank" rel="noopener noreferrer" class="buy-btn-table">Buy on {{ row.platform_name }}</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="demo-data-note">Demo / simulated pricing and availability — see the README for details.</div>
+</div>
+
+<div class="section">
+    <div class="section-head">
+        <h2>Price history</h2>
+        <span class="hint">{{ locality }}</span>
+    </div>
+    {% if history %}
+        <canvas id="priceChart" height="90"></canvas>
+        <div class="table-scroll">
+        <table class="history-table">
+            <caption class="sr-only">Recent price history for {{ product.name }} in {{ locality }}</caption>
+            <thead><tr><th scope="col">Date</th><th scope="col">Platform</th><th scope="col">Price</th><th scope="col">Available</th></tr></thead>
+            <tbody>
+                {% for h in history|slice:":15" %}
+                <tr>
+                    <td>{{ h.recorded_at|date:"M d, H:i" }}</td>
+                    <td>{{ h.product_offer.platform.name }}</td>
+                    <td>₹{{ h.price }}</td>
+                    <td>{% if h.is_available %}Yes{% else %}No{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    {% else %}
+        <div class="empty-state">No price history recorded yet for {{ locality.name }}.</div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if chart_points %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const points = {{ chart_points|safe }};
+    const labels = [...new Set(points.map(p => p.date))];
+    const byPlatform = {};
+    points.forEach(p => { (byPlatform[p.platform] ||= {})[p.date] = p.price; });
+    const palette = ['#3730a3', '#0f7a4f', '#b5560a', '#0369a1', '#9333ea'];
+    const datasets = Object.keys(byPlatform).map((platform, i) => ({
+        label: platform,
+        data: labels.map(d => byPlatform[platform][d] ?? null),
+        borderColor: palette[i % palette.length],
+        backgroundColor: 'transparent',
+        spanGaps: true, tension: 0.25, pointRadius: 2, borderWidth: 2,
+    }));
+    new Chart(document.getElementById('priceChart'), {
+        type: 'line',
+        data: { labels: labels, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+            scales: { y: { ticks: { callback: (v) => '₹' + v } }, x: { ticks: { font: { size: 10 } } } }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

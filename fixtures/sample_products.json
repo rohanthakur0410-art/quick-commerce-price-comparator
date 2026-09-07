@@ -1,0 +1,212 @@
+[
+  {
+    "name": "Amul Taaza Milk 1L",
+    "brand": "Amul",
+    "category": "Dairy",
+    "unit": "1L",
+    "base_price": 66
+  },
+  {
+    "name": "Amul Gold Milk 500ml",
+    "brand": "Amul",
+    "category": "Dairy",
+    "unit": "500ml",
+    "base_price": 35
+  },
+  {
+    "name": "Nandini Toned Milk 500ml",
+    "brand": "Nandini",
+    "category": "Dairy",
+    "unit": "500ml",
+    "base_price": 24
+  },
+  {
+    "name": "Amul Butter 500g",
+    "brand": "Amul",
+    "category": "Dairy",
+    "unit": "500g",
+    "base_price": 265
+  },
+  {
+    "name": "Britannia Brown Bread 400g",
+    "brand": "Britannia",
+    "category": "Bakery",
+    "unit": "400g",
+    "base_price": 48
+  },
+  {
+    "name": "Modern White Bread 400g",
+    "brand": "Modern",
+    "category": "Bakery",
+    "unit": "400g",
+    "base_price": 42
+  },
+  {
+    "name": "Tata Salt 1kg",
+    "brand": "Tata",
+    "category": "Grocery",
+    "unit": "1kg",
+    "base_price": 28
+  },
+  {
+    "name": "Aashirvaad Atta 5kg",
+    "brand": "Aashirvaad",
+    "category": "Grocery",
+    "unit": "5kg",
+    "base_price": 265
+  },
+  {
+    "name": "India Gate Basmati Rice 1kg",
+    "brand": "India Gate",
+    "category": "Grocery",
+    "unit": "1kg",
+    "base_price": 118
+  },
+  {
+    "name": "Toor Dal 1kg",
+    "brand": "Local",
+    "category": "Grocery",
+    "unit": "1kg",
+    "base_price": 165
+  },
+  {
+    "name": "Maggi Noodles 70g",
+    "brand": "Nestle",
+    "category": "Instant Food",
+    "unit": "70g",
+    "base_price": 14
+  },
+  {
+    "name": "Top Ramen Noodles 70g",
+    "brand": "Top Ramen",
+    "category": "Instant Food",
+    "unit": "70g",
+    "base_price": 13
+  },
+  {
+    "name": "MTR Rava Idli Mix 500g",
+    "brand": "MTR",
+    "category": "Instant Food",
+    "unit": "500g",
+    "base_price": 92
+  },
+  {
+    "name": "Red Label Tea 250g",
+    "brand": "Brooke Bond",
+    "category": "Beverages",
+    "unit": "250g",
+    "base_price": 132
+  },
+  {
+    "name": "Nescafe Classic Coffee 100g",
+    "brand": "Nescafe",
+    "category": "Beverages",
+    "unit": "100g",
+    "base_price": 285
+  },
+  {
+    "name": "Real Fruit Juice Mixed 1L",
+    "brand": "Real",
+    "category": "Beverages",
+    "unit": "1L",
+    "base_price": 110
+  },
+  {
+    "name": "Fortune Sunflower Oil 1L",
+    "brand": "Fortune",
+    "category": "Grocery",
+    "unit": "1L",
+    "base_price": 138
+  },
+  {
+    "name": "Farm Fresh Eggs (6 pcs)",
+    "brand": "Farm Fresh",
+    "category": "Dairy",
+    "unit": "6 pcs",
+    "base_price": 45
+  },
+  {
+    "name": "Colgate Strong Teeth 200g",
+    "brand": "Colgate",
+    "category": "Personal Care",
+    "unit": "200g",
+    "base_price": 96
+  },
+  {
+    "name": "Dove Soap 100g",
+    "brand": "Dove",
+    "category": "Personal Care",
+    "unit": "100g",
+    "base_price": 62
+  },
+  {
+    "name": "Head & Shoulders Shampoo 180ml",
+    "brand": "Head & Shoulders",
+    "category": "Personal Care",
+    "unit": "180ml",
+    "base_price": 175
+  },
+  {
+    "name": "Lays Classic Salted 52g",
+    "brand": "Lays",
+    "category": "Snacks",
+    "unit": "52g",
+    "base_price": 20
+  },
+  {
+    "name": "Britannia Good Day Cookies 200g",
+    "brand": "Britannia",
+    "category": "Snacks",
+    "unit": "200g",
+    "base_price": 40
+  },
+  {
+    "name": "Cadbury Dairy Milk 55g",
+    "brand": "Cadbury",
+    "category": "Snacks",
+    "unit": "55g",
+    "base_price": 45
+  },
+  {
+    "name": "Onion 1kg",
+    "brand": "Fresh",
+    "category": "Fruits & Vegetables",
+    "unit": "1kg",
+    "base_price": 38
+  },
+  {
+    "name": "Tomato 1kg",
+    "brand": "Fresh",
+    "category": "Fruits & Vegetables",
+    "unit": "1kg",
+    "base_price": 32
+  },
+  {
+    "name": "Banana Robusta (6 pcs)",
+    "brand": "Fresh",
+    "category": "Fruits & Vegetables",
+    "unit": "6 pcs",
+    "base_price": 42
+  },
+  {
+    "name": "Vim Dishwash Gel 500ml",
+    "brand": "Vim",
+    "category": "Household",
+    "unit": "500ml",
+    "base_price": 99
+  },
+  {
+    "name": "Surf Excel Detergent 1kg",
+    "brand": "Surf Excel",
+    "category": "Household",
+    "unit": "1kg",
+    "base_price": 145
+  },
+  {
+    "name": "Pampers Baby Diapers (Size M, 20 pcs)",
+    "brand": "Pampers",
+    "category": "Baby Care",
+    "unit": "20 pcs",
+    "base_price": 399
+  }
+]

@@ -1,0 +1,30 @@
+# Environment
+.env
+venv/
+env/
+*.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Generated catalog output (regenerate with: manage.py generate_catalog)
+fixtures/generated_products.json
+
+# Generated placeholder product images (regenerate with: manage.py generate_product_images)
+static/product_images/generated/

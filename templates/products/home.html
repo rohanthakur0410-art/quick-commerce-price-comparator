@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero" id="search">
+    <h1>Compare quick-commerce prices near you</h1>
+    <p class="sub">Find the cheapest place to buy — across Blinkit, Zepto, Instamart, Flipkart Minutes and BigBasket, for your Karnataka locality.</p>
+    <form method="get" action="{% url 'home' %}" class="search-form" role="search">
+        <label for="searchInput" class="sr-only">Search for a product</label>
+        <input type="text" id="searchInput" name="q" placeholder="Search for milk, bread, Maggi…" value="{{ search_term }}">
+        <button type="submit">Search</button>
+    </form>
+    {% if not search_term and not category_filter %}
+    <div class="popular-terms">
+        <span class="label">Popular:</span>
+        {% for term in popular_terms %}
+        <a href="{% url 'home' %}?q={{ term }}">{{ term }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% if platform_status and not search_term %}
+<div class="section">
+    <div class="section-head">
+        <h2>Delivering to {{ locality.name }}</h2>
+        <span class="hint">{{ platform_status|length }} platform{{ platform_status|length|pluralize }} tracked</span>
+    </div>
+    <div class="platform-scroller">
+        {% for entry in platform_status %}
+        <div class="platform-card">
+            <span class="p-badge" style="background:{{ entry.platform.primary_color|default:'#5b6272' }}">
+                {{ entry.platform.name|slice:":2"|upper }}
+            </span>
+            <div class="p-name">{{ entry.platform.name }}</div>
+            {% if entry.available %}
+                <span class="platform-status on">Delivers here</span>
+            {% else %}
+                <span class="platform-status off">Not available here</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if not search_term %}
+<div class="category-scroller" id="categories">
+    <a href="{% url 'home' %}" class="category-chip {% if not category_filter %}active{% endif %}">All</a>
+    {% for cat in categories %}
+    <a href="{% url 'home' %}?category={{ cat.name|urlencode }}" class="category-chip {% if category_filter == cat.name %}active{% endif %}">{{ cat.name }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+{% if best_deals %}
+<div class="section">
+    <div class="section-head">
+        <h2>Today's best deals in {{ locality.name }}</h2>
+        <span class="hint">Biggest gap between the top two platforms</span>
+    </div>
+    <div class="deal-grid">
+        {% for item in best_deals %}
+        <a href="{% url 'product-detail' item.product.id %}" class="deal-card">
+            <div class="deal-name">{{ item.product.name }}</div>
+            <div class="deal-price">₹{{ item.comparison.lowest_price }}</div>
+            <div class="deal-platform">on {{ item.comparison.best_platform }}</div>
+            <span class="savings-pill">Save ₹{{ item.comparison.savings_vs_next_best }} vs next best</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="section">
+    <div class="section-head">
+        <h2>
+            {% if search_term %}Results for "{{ search_term }}"{% elif category_filter %}{{ category_filter }}{% else %}All products{% endif %}
+            in {{ locality.name }}
+        </h2>
+        {% if total_count %}<span class="hint">{{ total_count }} product{{ total_count|pluralize }}</span>{% endif %}
+    </div>
+
+    {% if results %}
+    <div class="product-grid">
+        {% for item in results %}
+        <div class="product-card">
+            <a href="{% url 'product-detail' item.product.id %}" class="product-card-link">
+                <div class="p-image">
+                    {% if item.product.image_path %}
+                        <img src="/static/{{ item.product.image_path }}" alt="{{ item.product.name }}" loading="lazy" width="120" height="120">
+                    {% else %}
+                        <div class="p-image-fallback">{{ item.product.brand|slice:":2"|upper }}</div>
+                    {% endif %}
+                </div>
+                <div class="p-name">{{ item.product.name }}</div>
+                <div class="p-meta">{{ item.product.brand }} · {{ item.product.subcategory.category.name }}</div>
+
+                {% if item.comparison.lowest_price %}
+                <div class="p-best">
+                    <span class="price">₹{{ item.comparison.lowest_price }}</span>
+                    <span class="platform">best on {{ item.comparison.best_platform }}</span>
+                </div>
+                {% else %}
+                <div class="p-best"><span class="badge-mute">Unavailable in {{ locality.name }}</span></div>
+                {% endif %}
+            </a>
+
+            <div class="offer-list">
+                {% for row in item.comparison.rows %}
+                <div class="offer-row-mini">
+                    <span class="plat">{{ row.platform_name }}</span>
+                    {% if row.is_available %}
+                        <span class="amt {% if row.platform_name == item.comparison.best_platform %}best{% endif %}">₹{{ row.price }}</span>
+                        {% if row.buy_url %}
+                        <a href="{{ row.buy_url }}" target="_blank" rel="noopener noreferrer" class="buy-btn-mini" aria-label="Buy {{ item.product.name }} on {{ row.platform_name }}">Buy</a>
+                        {% endif %}
+                    {% elif row.serviceable %}
+                        <span class="amt oos">Out of stock</span>
+                    {% else %}
+                        <span class="amt unserviceable">Not available here</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if item.comparison.lowest_price %}
+            <form method="post" action="{% url 'cart-add' item.product.id %}" class="add-to-cart-form">
+                {% csrf_token %}
+                <button type="submit" class="add-to-cart-btn">Add to cart</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?{% if search_term %}q={{ search_term }}&{% endif %}{% if category_filter %}category={{ category_filter|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">&larr; Prev</a>
+        {% endif %}
+        <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?{% if search_term %}q={{ search_term }}&{% endif %}{% if category_filter %}category={{ category_filter|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% elif search_term %}
+        <div class="empty-state">No products found for "{{ search_term }}" in {{ locality.name }}. Try a different search, or change your location.</div>
+    {% elif not locality %}
+        <div class="empty-state">Select a location to see prices — run <code>python manage.py seed_data</code> if this is a fresh install.</div>
+    {% else %}
+        <div class="empty-state">No offers available for this category in {{ locality.name }} right now.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

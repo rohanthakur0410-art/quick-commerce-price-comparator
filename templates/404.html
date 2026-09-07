@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page not found — QuickCart{% endblock %}
+{% block content %}
+<div class="error-page">
+    <h1>Page not found</h1>
+    <p>The page you're looking for doesn't exist, or the link may be broken.</p>
+    <a href="{% url 'home' %}">&larr; Back to QuickCart</a>
+</div>
+{% endblock %}
